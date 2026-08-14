@@ -522,7 +522,7 @@
         </ul>
 
         <!-- Substitua o href pelo seu link real de pagamento do Cakto -->
-        <a class="btn-buy" href="https://pay.cakto.com.br/uwrbpk8_1037867" target="_blank" rel="noopener">
+        <a id="btn-comprar" class="btn-buy" href="https://pay.cakto.com.br/uwrbpk8_1037867" target="_blank" rel="noopener">
           Comprar
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
@@ -649,6 +649,16 @@
       lightbox.style.display = 'none';
       document.body.style.overflow = ''; // Destravar rolagem
     }, 250);
+  });
+
+  // Vercel Analytics — rastrear click no botão de comprar
+  document.getElementById('btn-comprar').addEventListener('click', () => {
+    if (typeof window.va === 'function') {
+      window.va('event', {
+        name: 'click_comprar',
+        data: { destino: 'cakto', preco: 'R$14,99' }
+      });
+    }
   });
 </script>
 
