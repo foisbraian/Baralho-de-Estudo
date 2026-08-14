@@ -796,36 +796,39 @@
   });
 
   // ---- Control del Video Player Customizado ----
-  const videoContainer = document.getElementById('video-container');
   const mainVideo = document.getElementById('main-video');
   const videoPlayBtn = document.getElementById('video-play-btn');
 
-  function togglePlay() {
+  // Al hacer click en el overlay del botón play centrado, reproduce el video
+  videoPlayBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mainVideo.play();
+  });
+
+  // Al hacer click en el propio elemento de video:
+  // Si está pausado, reproduce. Si está reproduciendo, pausa.
+  mainVideo.addEventListener('click', () => {
     if (mainVideo.paused) {
       mainVideo.play();
-      mainVideo.controls = true; // Activa los controles nativos al reproducir
-      videoPlayBtn.classList.add('hidden');
     } else {
       mainVideo.pause();
-      mainVideo.controls = false; // Oculta controles para mostrar de nuevo el play centrado
-      videoPlayBtn.classList.remove('hidden');
     }
-  }
+  });
 
-  videoContainer.addEventListener('click', (e) => {
-    // Si hace click en los controles nativos inferiores, no pausar el video
-    const rect = mainVideo.getBoundingClientRect();
-    const clickY = e.clientY - rect.top;
-    const controlsHeight = 44; // Altura aproximada de barra de control de navegador
-    if (clickY > rect.height - controlsHeight && !mainVideo.paused) {
-      return; 
-    }
-    togglePlay();
+  // Mantener la interfaz sincronizada mediante eventos nativos
+  mainVideo.addEventListener('play', () => {
+    videoPlayBtn.classList.add('hidden');
+    mainVideo.controls = true; // Muestra los controles del navegador
+  });
+
+  mainVideo.addEventListener('pause', () => {
+    videoPlayBtn.classList.remove('hidden');
+    mainVideo.controls = false; // Oculta controles nativos para mostrar el play limpio en el medio
   });
 
   mainVideo.addEventListener('ended', () => {
-    mainVideo.controls = false;
     videoPlayBtn.classList.remove('hidden');
+    mainVideo.controls = false;
   });
 </script>
 
