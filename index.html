@@ -146,15 +146,47 @@
       repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 2px, transparent 2px 14px);
     text-align:center;padding:20px;
   }
-  .play-btn{
-    width:64px;height:64px;border-radius:50%;
-    background:var(--red-500);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 8px 24px rgba(232,85,90,.5);
+  
+  /* Custom Play Overlay */
+  .video-play-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(35, 20, 23, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    z-index: 5;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
-  .play-btn svg{width:22px;height:22px;margin-left:3px;color:white;}
-  .video-placeholder .label{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:#F1BDBB;text-transform:uppercase;}
-  .video-placeholder .sub{font-size:13px;color:#D9A6A4;max-width:240px;}
+  .video-play-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .play-btn-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--red-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(232, 85, 90, 0.6);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+  }
+  .play-btn-circle svg {
+    width: 26px;
+    height: 26px;
+    margin-left: 4px;
+    color: white;
+  }
+  .video-play-overlay:hover .play-btn-circle {
+    transform: scale(1.08);
+    background: var(--red-600);
+  }
 
   .cards-preview{
     margin-top:16px;
@@ -320,6 +352,13 @@
 
   .demo-copy .feat{margin-bottom:20px;}
 
+  /* ---------- STUDY PREVIEW ---------- */
+  .study-preview {
+    padding: 88px 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--line);
+  }
+
   /* ---------- FAQ ---------- */
   .faq-list{border-top:1px solid var(--line);}
   .faq-item{border-bottom:1px solid var(--line);}
@@ -366,6 +405,9 @@
     .products-grid {
       grid-template-columns: 1fr;
       gap: 24px;
+    }
+    .study-preview {
+      padding: 64px 0;
     }
     .nav-inner {
       padding: 12px 16px;
@@ -466,8 +508,13 @@
     </div>
 
     <div class="hero-visual">
-      <div class="video-shell">
-        <video src="cartas.mp4" poster="poster.jpg" controls playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+      <div class="video-shell" id="video-container" style="cursor: pointer;">
+        <video id="main-video" src="cartas.mp4" poster="poster.jpg" playsinline style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+        <div id="video-play-btn" class="video-play-overlay">
+          <div class="play-btn-circle">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
       </div>
       <div class="cards-preview">
         <img src="ejemplo cartas digital.jpg" alt="Exemplo de fichas de revisão de estatística" loading="lazy">
@@ -495,7 +542,7 @@
   </div>
 </div>
 
-<!-- ============ DEMO ============ -->
+<!-- ============ DEMO 1: FICHAS ILUSTRADAS ============ -->
 <section class="demo">
   <div class="wrap demo-grid">
     <div class="flip-zone">
@@ -521,6 +568,28 @@
           <div class="feat-title">Formato pronto para recortar</div>
           <div class="feat-desc">Guias de corte incluídas no PDF para fichas perfeitas e uniformes.</div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEMO 2: CADERNO DE ESTUDOS ============ -->
+<section class="study-preview">
+  <div class="wrap demo-grid">
+    <div class="demo-copy">
+      <div class="section-tag">Estudo visual</div>
+      <h2 style="font-size: clamp(24px, 3vw, 34px); line-height: 1.15;">Dê mais cor aos seus estudos e deixe seus resumos muito mais fáceis de revisar!</h2>
+      <p class="section-desc" style="margin-bottom: 24px;">As ilustrações foram pensadas para facilitar a compreensão e a memorização dos principais conceitos de Estatística, tornando o estudo mais visual, leve e divertido.</p>
+      
+      <div style="background: var(--paper); border: 1px solid var(--line); border-left: 4px solid var(--red-500); padding: 18px 24px; border-radius: 0 12px 12px 0; margin-top: 24px; box-shadow: 0 8px 24px -10px rgba(35,20,23,0.05);">
+        <p style="font-family: var(--display); font-size: 17px; font-weight: 600; color: var(--ink); line-height: 1.4; margin: 0;">
+          Estude, revise e nunca mais esqueça os conceitos de Estatística!
+        </p>
+      </div>
+    </div>
+    <div class="flip-zone">
+      <div class="single-card" style="max-width: 440px; aspect-ratio: auto;">
+        <img src="estudio.jpg" alt="Fichas de estatística no caderno de estudos" loading="lazy">
       </div>
     </div>
   </div>
@@ -724,6 +793,39 @@
     if (typeof window.clarity === 'function') {
       window.clarity('event', 'click_comprar_inferencial');
     }
+  });
+
+  // ---- Control del Video Player Customizado ----
+  const videoContainer = document.getElementById('video-container');
+  const mainVideo = document.getElementById('main-video');
+  const videoPlayBtn = document.getElementById('video-play-btn');
+
+  function togglePlay() {
+    if (mainVideo.paused) {
+      mainVideo.play();
+      mainVideo.controls = true; // Activa los controles nativos al reproducir
+      videoPlayBtn.classList.add('hidden');
+    } else {
+      mainVideo.pause();
+      mainVideo.controls = false; // Oculta controles para mostrar de nuevo el play centrado
+      videoPlayBtn.classList.remove('hidden');
+    }
+  }
+
+  videoContainer.addEventListener('click', (e) => {
+    // Si hace click en los controles nativos inferiores, no pausar el video
+    const rect = mainVideo.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const controlsHeight = 44; // Altura aproximada de barra de control de navegador
+    if (clickY > rect.height - controlsHeight && !mainVideo.paused) {
+      return; 
+    }
+    togglePlay();
+  });
+
+  mainVideo.addEventListener('ended', () => {
+    mainVideo.controls = false;
+    videoPlayBtn.classList.remove('hidden');
   });
 </script>
 
