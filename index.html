@@ -7,6 +7,15 @@
 <!-- Vercel Analytics -->
 <script defer src="/_vercel/insights/script.js"></script>
 
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "y2fcd2452k");
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -375,7 +384,67 @@
   }
   .lightbox-overlay.active .lightbox-content {
     transform: scale(1);
+  }  /* ---------- CHECKOUT MODAL ---------- */
+  .checkout-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 10, 12, 0.88);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 16px;
   }
+  .checkout-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+  .checkout-modal {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    height: min(700px, 92vh);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    background: var(--white);
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .checkout-overlay.active .checkout-modal {
+    transform: scale(1) translateY(0);
+  }
+  .checkout-modal iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .checkout-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(35,20,23,0.75);
+    backdrop-filter: blur(6px);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 10;
+    transition: background 0.2s ease;
+  }
+  .checkout-close:hover { background: var(--red-600); }
+  .checkout-close svg { width: 16px; height: 16px; }
+
 </style>
 </head>
 <body>
@@ -522,7 +591,7 @@
         </ul>
 
         <!-- Substitua o href pelo seu link real de pagamento do Cakto -->
-        <a id="btn-comprar" class="btn-buy" href="https://pay.cakto.com.br/uwrbpk8_1037867" target="_blank" rel="noopener">
+        <a id="btn-comprar" class="btn-buy" href="https://pay.cakto.com.br/uwrbpk8_1037867" target="_blank" rel="noopener" onclick="abrirCheckout(event)">
           Comprar
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
@@ -607,9 +676,21 @@
   <p>Pagamentos processados pelo Cakto</p>
 </footer>
 
-<!-- Lightbox Overlay -->
+<!-- Lightbox (zoom de imagens) -->
 <div id="lightbox" class="lightbox-overlay">
   <img id="lightbox-img" class="lightbox-content" src="" alt="Imagem ampliada">
+</div>
+
+<!-- Checkout Modal -->
+<div id="checkout-overlay" class="checkout-overlay">
+  <div class="checkout-modal">
+    <button class="checkout-close" id="checkout-close" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+    <iframe id="checkout-iframe" src="" title="Checkout seguro"></iframe>
+  </div>
 </div>
 
 <script>
@@ -660,6 +741,53 @@
       });
     }
   });
+
+  // ---- Checkout Modal ----
+  const CAKTO_URL = 'https://pay.cakto.com.br/uwrbpk8_1037867';
+  const checkoutOverlay = document.getElementById('checkout-overlay');
+  const checkoutIframe  = document.getElementById('checkout-iframe');
+  const checkoutClose   = document.getElementById('checkout-close');
+
+  function abrirCheckout(e) {
+    e.preventDefault();
+
+    // Clarity: registrar evento de click
+    if (typeof window.clarity === 'function') {
+      window.clarity('event', 'click_comprar');
+    }
+
+    // Tentar abrir no modal; se o iframe falhar (X-Frame-Options), abre nova aba
+    checkoutIframe.src = CAKTO_URL;
+    checkoutOverlay.style.display = 'flex';
+    checkoutOverlay.offsetHeight; // reflow
+    checkoutOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Detectar se o iframe foi bloqueado (errão de carregamento)
+    checkoutIframe.onerror = () => fecharCheckout(true);
+  }
+
+  function fecharCheckout(fallback = false) {
+    checkoutOverlay.classList.remove('active');
+    setTimeout(() => {
+      checkoutOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+      if (fallback) window.open(CAKTO_URL, '_blank');
+      checkoutIframe.src = '';
+    }, 300);
+  }
+
+  checkoutClose.addEventListener('click', () => fecharCheckout());
+  checkoutOverlay.addEventListener('click', (e) => {
+    if (e.target === checkoutOverlay) fecharCheckout();
+  });
+  // Tecla Escape fecha o modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') fecharCheckout();
+  });
+
+  // Expor função globalmente (usada no onclick do botão)
+  window.abrirCheckout = abrirCheckout;
 </script>
 
 
