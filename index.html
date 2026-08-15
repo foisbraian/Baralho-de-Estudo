@@ -16,6 +16,26 @@
     })(window, document, "clarity", "script", "y2fcd2452k");
 </script>
 
+<!-- Meta Pixel Code -->
+<script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '951410207980236');
+  fbq('track', 'PageView');
+</script>
+<noscript>
+  <img height="1" width="1" style="display:none" 
+       src="https://www.facebook.com/tr?id=951410207980236&ev=PageView&noscript=1"/>
+</noscript>
+<!-- End Meta Pixel Code -->
+
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -782,16 +802,36 @@
     }, 250);
   });
 
-  // Clarity — rastrear click nos botões de comprar
+  // Clarity & Meta Pixel — rastrear click nos botões de comprar
   document.getElementById('btn-comprar-geral').addEventListener('click', () => {
+    // 1. Evento Clarity
     if (typeof window.clarity === 'function') {
       window.clarity('event', 'click_comprar_geral');
+    }
+    // 2. Evento Meta Pixel (Iniciar Checkout)
+    if (typeof fbq === 'function') {
+      fbq('track', 'InitiateCheckout', {
+        content_name: 'Fichas de Estatística Geral',
+        content_category: 'Education',
+        value: 14.99,
+        currency: 'BRL'
+      });
     }
   });
 
   document.getElementById('btn-comprar-inferencial').addEventListener('click', () => {
+    // 1. Evento Clarity
     if (typeof window.clarity === 'function') {
       window.clarity('event', 'click_comprar_inferencial');
+    }
+    // 2. Evento Meta Pixel (Iniciar Checkout)
+    if (typeof fbq === 'function') {
+      fbq('track', 'InitiateCheckout', {
+        content_name: 'Fichas de Estatística Inferencial',
+        content_category: 'Education',
+        value: 14.99,
+        currency: 'BRL'
+      });
     }
   });
 
