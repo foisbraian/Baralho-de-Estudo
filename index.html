@@ -92,10 +92,135 @@
     font-family:var(--mono);font-size:13px;font-weight:600;
     background:var(--ink);color:var(--white);
     padding:10px 18px;border-radius:99px;text-decoration:none;
+    border:none;cursor:pointer;
     transition:transform .15s ease, background .15s ease;
     flex-shrink: 0;
   }
   .nav-cta:hover{background:var(--red-600);transform:translateY(-1px);}
+
+  .quick-buy-trigger,
+  .btn-primary,
+  .btn-buy,
+  .nav-cta {
+    text-decoration: none;
+  }
+
+  /* ---------- QUICK BUY MODAL ---------- */
+  .buy-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(18, 10, 12, 0.72);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .22s ease, visibility .22s ease;
+    z-index: 1000;
+  }
+  .buy-modal-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .buy-modal {
+    width: min(560px, 100%);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(35,20,23,.28);
+    padding: 28px 24px 20px;
+    transform: translateY(14px) scale(.98);
+    transition: transform .22s ease;
+    position: relative;
+  }
+  .buy-modal-backdrop.open .buy-modal {
+    transform: translateY(0) scale(1);
+  }
+  .buy-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .buy-modal-title {
+    font-family: var(--display);
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1.1;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .buy-modal-close {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .buy-options {
+    display: grid;
+    gap: 12px;
+  }
+  .buy-option {
+    width: 100%;
+    text-align: left;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    color: var(--ink);
+  }
+  .buy-option:hover {
+    transform: translateY(-1px);
+    border-color: rgba(214,63,69,.4);
+    background: #fff5f4;
+  }
+  .buy-option strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 3px;
+  }
+  .buy-option span {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .buy-option .price-pill {
+    flex-shrink: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red-700);
+    background: rgba(214,63,69,.08);
+    border: 1px solid rgba(214,63,69,.16);
+    padding: 7px 10px;
+    border-radius: 999px;
+  }
+  .buy-modal-note {
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .04em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+  }
 
   /* ---------- HERO ---------- */
   .hero{
@@ -532,7 +657,7 @@
 <nav class="nav">
   <div class="nav-inner">
     <div class="brand"><span class="dot"></span>Fichas de Estatística</div>
-    <a class="nav-cta" href="#compra">Comprar agora</a>
+    <button class="nav-cta js-open-buy-modal" type="button">Comprar agora</button>
   </div>
 </nav>
 
@@ -545,10 +670,10 @@
       <p class="hero-sub">Um baralho de 100 fichas de revisão, em PDF pronto para imprimir, com as fórmulas, definições e exercícios que mais caem nas provas. Feitas para memorizar rápido e revisar em qualquer lugar.</p>
 
       <div class="hero-actions">
-        <a class="btn-primary" href="#compra">
-          Quero minhas 100 fichas
+        <button class="btn-primary js-open-buy-modal" type="button">
+          Comprar agora
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
+        </button>
         <span class="hero-note">Download imediato · PDF para imprimir</span>
       </div>
 
@@ -812,14 +937,51 @@
       <div class="final-cta-inner">
         <h2>Comece a revisar hoje</h2>
         <p>Baixe seu PDF, imprima suas fichas e leve a estatística para todo lugar.</p>
-        <a class="btn-primary" href="#compra">
+        <button class="btn-primary js-open-buy-modal" type="button">
           Quero minhas 100 fichas
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </a>
+        </button>
       </div>
     </div>
   </div>
 </section>
+
+<div class="buy-modal-backdrop" id="buy-modal-backdrop" aria-hidden="true">
+  <div class="buy-modal" role="dialog" aria-modal="true" aria-labelledby="buy-modal-title">
+    <div class="buy-modal-header">
+      <h3 class="buy-modal-title" id="buy-modal-title">Escolha seu baralho</h3>
+      <button type="button" class="buy-modal-close" aria-label="Fechar">×</button>
+    </div>
+
+    <div class="buy-options">
+      <button type="button" class="buy-option" data-buy-link="https://pay.cakto.com.br/uwrbpk8_1037867">
+        <div>
+          <strong>Estatística Descritiva</strong>
+          <span>Fichas gerais · PDF para imprimir</span>
+        </div>
+        <span class="price-pill">R$ 14,99</span>
+      </button>
+
+      <button type="button" class="buy-option" data-buy-link="https://pay.cakto.com.br/72mrduu_1040898">
+        <div>
+          <strong>Estatística Inferencial</strong>
+          <span>Testes, regressão e inferência</span>
+        </div>
+        <span class="price-pill">R$ 14,99</span>
+      </button>
+
+      <button type="button" class="buy-option" data-buy-link="https://pay.cakto.com.br/h52m2gr_1044927">
+        <div>
+          <strong>SPSS</strong>
+          <span>Passo a passo para análise de dados</span>
+        </div>
+        <span class="price-pill">R$ 14,99</span>
+      </button>
+    </div>
+
+    <div class="buy-modal-note">Pagamento seguro via Cakto</div>
+  </div>
+</div>
 
 <footer>
   <p>Fichas de Estatística — produto digital em PDF</p>
@@ -832,6 +994,48 @@
 </div>
 
 <script>
+  // Quick buy modal
+  const buyModal = document.getElementById('buy-modal-backdrop');
+  const buyModalClose = document.querySelector('.buy-modal-close');
+  const buyTriggers = document.querySelectorAll('.js-open-buy-modal');
+
+  function openBuyModal() {
+    buyModal.classList.add('open');
+    buyModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeBuyModal() {
+    buyModal.classList.remove('open');
+    buyModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  buyTriggers.forEach(trigger => {
+    trigger.addEventListener('click', openBuyModal);
+  });
+
+  buyModalClose.addEventListener('click', closeBuyModal);
+  buyModal.addEventListener('click', (event) => {
+    if (event.target === buyModal) closeBuyModal();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && buyModal.classList.contains('open')) {
+      closeBuyModal();
+    }
+  });
+
+  document.querySelectorAll('.buy-option').forEach(button => {
+    button.addEventListener('click', () => {
+      const link = button.dataset.buyLink;
+      if (link) {
+        closeBuyModal();
+        window.open(link, '_blank', 'noopener');
+      }
+    });
+  });
+
   // FAQ accordion
   document.querySelectorAll('.faq-item').forEach(item => {
     item.querySelector('.faq-q').addEventListener('click', () => {
